@@ -1,9 +1,9 @@
-//! OwnerSignal contract for repository-ledger.
+//! Owner Signal contract for repository-ledger.
 
 use nota_codec::{NotaEnum, NotaRecord, NotaTransparent};
 use rkyv::{Archive, Deserialize as RkyvDeserialize, Serialize as RkyvSerialize};
 use signal_core::signal_channel;
-pub use signal_repository_ledger::{RepositoryLedgerPath, RepositoryName, RepositoryRegistration};
+pub use signal_repository_ledger::{FilesystemPath, Name, Registration};
 
 #[derive(
     Archive, RkyvSerialize, RkyvDeserialize, NotaTransparent, Debug, Clone, PartialEq, Eq, Hash,
@@ -21,101 +21,99 @@ impl MirrorTarget {
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
-pub struct RetireRepository {
-    pub repository_name: RepositoryName,
+pub struct Retirement {
+    pub repository_name: Name,
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
 pub struct SpoolDirectoryPolicy {
-    pub path: RepositoryLedgerPath,
+    pub path: FilesystemPath,
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
 pub struct MirrorPolicy {
-    pub repository_name: RepositoryName,
+    pub repository_name: Name,
     pub target: MirrorTarget,
     pub enabled: bool,
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
-pub struct RepositoryRegistered {
-    pub repository_name: RepositoryName,
+pub struct Registered {
+    pub repository_name: Name,
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
-pub struct RepositoryRetired {
-    pub repository_name: RepositoryName,
+pub struct Retired {
+    pub repository_name: Name,
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
 pub struct SpoolDirectoryPolicySet {
-    pub path: RepositoryLedgerPath,
+    pub path: FilesystemPath,
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
 pub struct MirrorPolicySet {
-    pub repository_name: RepositoryName,
+    pub repository_name: Name,
     pub target: MirrorTarget,
 }
 
 #[derive(
     Archive, RkyvSerialize, RkyvDeserialize, NotaEnum, Debug, Clone, Copy, PartialEq, Eq, Hash,
 )]
-pub enum OwnerRepositoryLedgerOperationKind {
-    RegisterRepository,
-    RetireRepository,
-    SetSpoolDirectoryPolicy,
-    SetMirrorPolicy,
+pub enum OperationKind {
+    Registration,
+    Retirement,
+    SpoolDirectoryPolicy,
+    MirrorPolicy,
 }
 
 #[derive(
     Archive, RkyvSerialize, RkyvDeserialize, NotaEnum, Debug, Clone, Copy, PartialEq, Eq, Hash,
 )]
-pub enum OwnerRepositoryLedgerUnimplementedReason {
+pub enum UnimplementedReason {
     StoreUnavailable,
     MirrorDispatchNotBuilt,
     NotInPrototypeScope,
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
-pub struct OwnerRepositoryLedgerRequestUnimplemented {
-    pub operation: OwnerRepositoryLedgerOperationKind,
-    pub reason: OwnerRepositoryLedgerUnimplementedReason,
+pub struct RequestUnimplemented {
+    pub operation: OperationKind,
+    pub reason: UnimplementedReason,
 }
 
 signal_channel! {
-    channel OwnerRepositoryLedger {
-        request OwnerRepositoryLedgerRequest {
-            Mutate RegisterRepository(RepositoryRegistration),
-            Retract RetireRepository(RetireRepository),
-            Mutate SetSpoolDirectoryPolicy(SpoolDirectoryPolicy),
-            Mutate SetMirrorPolicy(MirrorPolicy),
+    channel Owner {
+        request Request {
+            Mutate Registration(Registration),
+            Retract Retirement(Retirement),
+            Mutate SpoolDirectoryPolicy(SpoolDirectoryPolicy),
+            Mutate MirrorPolicy(MirrorPolicy),
         }
-        reply OwnerRepositoryLedgerReply {
-            RepositoryRegistered(RepositoryRegistered),
-            RepositoryRetired(RepositoryRetired),
+        reply Reply {
+            Registered(Registered),
+            Retired(Retired),
             SpoolDirectoryPolicySet(SpoolDirectoryPolicySet),
             MirrorPolicySet(MirrorPolicySet),
-            OwnerRepositoryLedgerRequestUnimplemented(OwnerRepositoryLedgerRequestUnimplemented),
+            RequestUnimplemented(RequestUnimplemented),
         }
     }
 }
 
-pub type Frame = OwnerRepositoryLedgerFrame;
-pub type FrameBody = OwnerRepositoryLedgerFrameBody;
-pub type ChannelRequest = OwnerRepositoryLedgerChannelRequest;
-pub type ChannelReply = OwnerRepositoryLedgerChannelReply;
-pub type RequestBuilder = OwnerRepositoryLedgerRequestBuilder;
+pub type Frame = OwnerFrame;
+pub type FrameBody = OwnerFrameBody;
+pub type ChannelRequest = OwnerChannelRequest;
+pub type ChannelReply = OwnerChannelReply;
+pub type RequestBuilder = OwnerRequestBuilder;
 
-impl OwnerRepositoryLedgerRequest {
-    pub fn operation_kind(&self) -> OwnerRepositoryLedgerOperationKind {
+impl Request {
+    pub fn operation_kind(&self) -> OperationKind {
         match self {
-            Self::RegisterRepository(_) => OwnerRepositoryLedgerOperationKind::RegisterRepository,
-            Self::RetireRepository(_) => OwnerRepositoryLedgerOperationKind::RetireRepository,
-            Self::SetSpoolDirectoryPolicy(_) => {
-                OwnerRepositoryLedgerOperationKind::SetSpoolDirectoryPolicy
-            }
-            Self::SetMirrorPolicy(_) => OwnerRepositoryLedgerOperationKind::SetMirrorPolicy,
+            Self::Registration(_) => OperationKind::Registration,
+            Self::Retirement(_) => OperationKind::Retirement,
+            Self::SpoolDirectoryPolicy(_) => OperationKind::SpoolDirectoryPolicy,
+            Self::MirrorPolicy(_) => OperationKind::MirrorPolicy,
         }
     }
 }

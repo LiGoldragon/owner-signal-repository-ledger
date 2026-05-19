@@ -288,7 +288,7 @@ dependencies = [
 [[package]]
 name = "signal-repository-ledger"
 version = "0.1.0"
-source = "git+ssh://gitolite@localhost/signal-repository-ledger?branch=main#73f7f517b9e38c517f857d4ed742bb55925d5677"
+source = "git+ssh://gitolite@localhost/signal-repository-ledger?branch=main#056da85b5ced26d169a9a331099ea630a4df5576"
 dependencies = [
  "nota-codec",
  "nota-config",
