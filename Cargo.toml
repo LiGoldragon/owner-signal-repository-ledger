@@ -1,0 +1,23 @@
+[package]
+name         = "owner-signal-repository-ledger"
+version      = "0.1.0"
+edition      = "2024"
+rust-version = "1.85"
+license      = "MIT OR Apache-2.0"
+description  = "OwnerSignal contract for repository-ledger authority and configuration."
+publish      = false
+
+[lib]
+name = "owner_signal_repository_ledger"
+path = "src/lib.rs"
+
+[dependencies]
+nota-codec               = { git = "https://github.com/LiGoldragon/nota-codec.git", branch = "main" }
+rkyv                     = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
+signal-core              = { git = "https://github.com/LiGoldragon/signal-core.git", branch = "main" }
+signal-repository-ledger = { path = "../signal-repository-ledger" }
+
+[lints.rust]
+unsafe_code = "forbid"
+unused      = { level = "warn", priority = -1 }
+dead_code   = "warn"
