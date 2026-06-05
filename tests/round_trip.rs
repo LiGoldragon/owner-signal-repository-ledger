@@ -3,7 +3,7 @@ use meta_signal_repository_ledger::{
     Operation, OperationKind, Registered, Registration, Reply, RequestUnimplemented, Retired,
     Retirement, SpoolDirectoryPolicy, SpoolDirectoryPolicySet, UnimplementedReason,
 };
-use nota_codec::{Decoder, Encoder, NotaDecode, NotaEncode};
+use nota_next::{NotaEncode, NotaSource};
 use signal_frame::{
     ExchangeIdentifier, ExchangeLane, LaneSequence, NonEmpty, Reply as FrameReply, RequestPayload,
     SessionEpoch, SubReply,
@@ -117,18 +117,14 @@ fn meta_replies_round_trip_through_signal_frame() {
 #[test]
 fn meta_operations_encode_as_contract_local_nota_heads() {
     let operation = Operation::Register(registration());
-    let mut encoder = Encoder::new();
-    operation
-        .into_request()
-        .encode(&mut encoder)
-        .expect("encode");
-    let text = encoder.into_string();
+    let text = operation.into_request().to_nota();
 
     assert!(text.starts_with("(Register "));
     assert!(!text.contains("Mutate"));
     assert!(!text.contains("Retract"));
 
-    let mut decoder = Decoder::new(&text);
-    let decoded = ChannelRequest::decode(&mut decoder).expect("decode");
+    let decoded = NotaSource::new(&text)
+        .parse::<ChannelRequest>()
+        .expect("decode");
     assert_eq!(decoded.payloads().head().kind(), OperationKind::Register);
 }

@@ -2,7 +2,7 @@
 name         = "meta-signal-repository-ledger"
 version      = "0.1.0"
 edition      = "2024"
-rust-version = "1.85"
+rust-version = "1.88"
 license      = "MIT OR Apache-2.0"
 description  = "MetaSignal contract for repository-ledger authority and configuration."
 publish      = false
@@ -12,7 +12,7 @@ name = "meta_signal_repository_ledger"
 path = "src/lib.rs"
 
 [dependencies]
-nota-codec               = { git = "https://github.com/LiGoldragon/nota-codec.git", branch = "main" }
+nota-next                = { git = "https://github.com/LiGoldragon/nota-next.git", branch = "main" }
 rkyv                     = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }
 signal-frame             = { git = "https://github.com/LiGoldragon/signal-frame.git", branch = "main" }
 signal-repository-ledger = { git = "https://github.com/LiGoldragon/signal-repository-ledger", branch = "main" }
