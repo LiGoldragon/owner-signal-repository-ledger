@@ -1,5 +1,7 @@
 //! Meta Signal contract for repository-ledger.
 
+#[cfg(not(feature = "nota-text"))]
+use nota_next::{Block, NotaDecodeError};
 use nota_next::{NotaDecode, NotaEncode};
 use rkyv::{Archive, Deserialize as RkyvDeserialize, Serialize as RkyvSerialize};
 use signal_frame::signal_channel;
@@ -121,6 +123,50 @@ signal_channel! {
         SpoolDirectoryPolicySet(SpoolDirectoryPolicySet),
         MirrorPolicySet(MirrorPolicySet),
         RequestUnimplemented(RequestUnimplemented),
+    }
+}
+
+#[cfg(not(feature = "nota-text"))]
+impl OperationKind {
+    const fn as_nota_atom(self) -> &'static str {
+        match self {
+            Self::Register => "Register",
+            Self::Retire => "Retire",
+            Self::SetSpoolDirectory => "SetSpoolDirectory",
+            Self::SetMirror => "SetMirror",
+        }
+    }
+
+    fn from_nota_atom(atom: &str) -> Result<Self, NotaDecodeError> {
+        match atom {
+            "Register" => Ok(Self::Register),
+            "Retire" => Ok(Self::Retire),
+            "SetSpoolDirectory" => Ok(Self::SetSpoolDirectory),
+            "SetMirror" => Ok(Self::SetMirror),
+            variant => Err(NotaDecodeError::UnknownVariant {
+                enum_name: "OperationKind",
+                variant: variant.to_owned(),
+            }),
+        }
+    }
+}
+
+#[cfg(not(feature = "nota-text"))]
+impl NotaEncode for OperationKind {
+    fn to_nota(&self) -> String {
+        self.as_nota_atom().to_owned()
+    }
+}
+
+#[cfg(not(feature = "nota-text"))]
+impl NotaDecode for OperationKind {
+    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
+        let atom = block
+            .demote_to_string()
+            .ok_or(NotaDecodeError::ExpectedAtom {
+                type_name: "OperationKind",
+            })?;
+        Self::from_nota_atom(atom)
     }
 }
 

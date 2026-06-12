@@ -11,6 +11,10 @@ publish      = false
 name = "meta_signal_repository_ledger"
 path = "src/lib.rs"
 
+[features]
+default   = []
+nota-text = []
+
 [dependencies]
 nota-next                = { git = "https://github.com/LiGoldragon/nota-next.git", branch = "main" }
 rkyv                     = { version = "0.8", default-features = false, features = ["std", "bytecheck", "little_endian", "pointer_width_32", "unaligned"] }

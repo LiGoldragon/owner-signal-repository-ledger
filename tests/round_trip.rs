@@ -1,8 +1,9 @@
 use meta_signal_repository_ledger::{
-    ChannelRequest, FilesystemPath, Frame, FrameBody, MirrorPolicy, MirrorPolicySet, MirrorTarget,
-    Operation, OperationKind, Registered, Registration, Reply, RequestUnimplemented, Retired,
-    Retirement, SpoolDirectoryPolicy, SpoolDirectoryPolicySet, UnimplementedReason,
+    FilesystemPath, Frame, FrameBody, MirrorPolicy, MirrorPolicySet, MirrorTarget, Operation,
+    OperationKind, Registered, Registration, Reply, RequestUnimplemented, Retired, Retirement,
+    SpoolDirectoryPolicy, SpoolDirectoryPolicySet, UnimplementedReason,
 };
+#[cfg(feature = "nota-text")]
 use nota_next::{NotaEncode, NotaSource};
 use signal_frame::{
     ExchangeIdentifier, ExchangeLane, LaneSequence, NonEmpty, Reply as FrameReply, RequestPayload,
@@ -115,16 +116,15 @@ fn meta_replies_round_trip_through_signal_frame() {
 }
 
 #[test]
+#[cfg(feature = "nota-text")]
 fn meta_operations_encode_as_contract_local_nota_heads() {
     let operation = Operation::Register(registration());
-    let text = operation.into_request().to_nota();
+    let text = operation.to_nota();
 
     assert!(text.starts_with("(Register "));
     assert!(!text.contains("Mutate"));
     assert!(!text.contains("Retract"));
 
-    let decoded = NotaSource::new(&text)
-        .parse::<ChannelRequest>()
-        .expect("decode");
-    assert_eq!(decoded.payloads().head().kind(), OperationKind::Register);
+    let decoded = NotaSource::new(&text).parse::<Operation>().expect("decode");
+    assert_eq!(decoded.kind(), OperationKind::Register);
 }
